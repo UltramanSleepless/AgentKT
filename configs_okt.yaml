@@ -31,7 +31,7 @@ lstm_hid_dim: 768 # Fixed at 768 as it's GPT-2 token embedding size
 use_classifier: false # if true, multi-task setting
 classifier_hid_dim: 50 
 lstm_init: 'rand' ## LSTM initialization, choose from 'rand' or 'zero'
-pre_trained_lstm_path: '/data2/liyu/KT/OKT/checkpoints/20251004_114327'  # use if pretrain LSTM model: model/lstm/student_model
+pre_trained_lstm_path: '/data2/liyu/KT/OKT/checkpoints/20251004_114327/student_model'  # use if pretrain LSTM model: model/lstm/student_model
 pre_trained_classifier_path: null # use when use_classifier = true for multi-task setting
 train_lstm: true 
 lstm_lr: 0.00001
