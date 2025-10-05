@@ -46,7 +46,7 @@ def create_okt_model(configs):
     tokenizer = create_tokenizer(configs)
     
     if configs.okt_model == 'student':
-        model = AutoModelWithLMHead.from_pretrained("model/gpt_code_v1_student")
+        model = AutoModelWithLMHead.from_pretrained("pretrained_lm/gpt_code_v1_student")
     elif configs.okt_model == 'funcom':
         model = AutoModelWithLMHead.from_pretrained("model/gpt_code_v1")
     else:

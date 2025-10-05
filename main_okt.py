@@ -18,6 +18,9 @@ from trainer import *
 from utils import *
 from eval import *
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "5"  # 只允许程序看到 GPU 5
+
+
 ## training options
 mydict = yaml.safe_load(open("configs_okt.yaml", "r"))
 configs = Munch(mydict)

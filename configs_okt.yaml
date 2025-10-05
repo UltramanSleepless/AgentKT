@@ -39,7 +39,7 @@ cls_lr: 0.001
 ##################################################
 # model_gpt_opts
 ##################################################
-okt_model: 'gpt-2' # pre-trained GPT model: choose from 'student', 'funcom' or 'gpt-2'
+okt_model: 'student' # pre-trained GPT model: choose from 'student', 'funcom' or 'gpt-2'
 train_okt: true 
 pad_token: 'pad' # padding token: choose from 'pad' or 'eos'
 # combine knowledge state with input, choose from add, average, linear, weight, exp_decay, kc_sim_decay, exp_kc_decay, no_decay
