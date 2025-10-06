@@ -9,8 +9,7 @@ import sys
 def parse_args():
     parser = argparse.ArgumentParser(
         description=(
-            "Merge all Project_CodeNet problem-level metadata CSVs into one file, "
-            "sorted by user_id."
+            "Extract per-user CSVs from Project_CodeNet problem-level metadata files."
         )
     )
     parser.add_argument(
@@ -22,10 +21,10 @@ def parse_args():
         ),
     )
     parser.add_argument(
-        "--output",
+        "--output_dir",
         "-o",
-        default="/data2/liyu/KT/OKT/Project_CodeNet/metadata_merged.csv",
-        help="Output CSV file path (default: %(default)s)",
+        default="/data2/liyu/KT/OKT/Project_CodeNet/userdata",
+        help="Output directory for per-user CSVs (default: %(default)s)",
     )
     return parser.parse_args()
 
@@ -33,7 +32,7 @@ def parse_args():
 def main():
     args = parse_args()
     metadata_dir = os.path.abspath(args.metadata_dir)
-    out_csv = os.path.abspath(args.output)
+    out_dir = os.path.abspath(args.output_dir)
 
     if not os.path.isdir(metadata_dir):
         print(f"Metadata directory not found: {metadata_dir}", file=sys.stderr)
@@ -43,11 +42,11 @@ def main():
         [p for p in glob.glob(os.path.join(metadata_dir, "p*.csv")) if os.path.isfile(p)]
     )
     if not csv_paths:
-        print("No problem-level CSVs found to merge.")
+        print("No problem-level CSVs found to extract.")
         return
 
     header = None
-    rows = []
+    user_to_rows = {}
     for path in csv_paths:
         with open(path, newline="", encoding="utf-8") as f:
             reader = csv.reader(f)
@@ -63,28 +62,36 @@ def main():
                                 file=sys.stderr,
                             )
                     continue
-                if row:
-                    rows.append(row)
+                if not row:
+                    continue
+                if len(row) < 3:
+                    continue
+                user_id = row[2]
+                user_to_rows.setdefault(user_id, []).append(row)
 
     if header is None:
         print("No header found; aborting.", file=sys.stderr)
         sys.exit(1)
 
-    # Sort by user_id (column index 2), secondary by submission_id to stabilize
-    try:
-        rows.sort(key=lambda r: (r[2], r[0]))
-    except IndexError:
-        print("Unexpected row format; cannot sort.", file=sys.stderr)
-        sys.exit(1)
+    # Ensure output directory
+    os.makedirs(out_dir, exist_ok=True)
 
-    os.makedirs(os.path.dirname(out_csv), exist_ok=True)
-    with open(out_csv, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(header)
-        writer.writerows(rows)
+    # For each user, sort rows by date then submission_id and write <user_id>.csv
+    written = 0
+    for user_id, rows in user_to_rows.items():
+        try:
+            rows.sort(key=lambda r: (int(r[3]), r[0]))  # date, submission_id
+        except Exception:
+            rows.sort(key=lambda r: (r[3], r[0]))
+        out_path = os.path.join(out_dir, f"{user_id}.csv")
+        with open(out_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+            writer.writerows(rows)
+        written += 1
 
     print(
-        f"Merged {len(csv_paths)} CSVs into {out_csv} with {len(rows)} rows, sorted by user_id."
+        f"Wrote {written} per-user CSV files to {out_dir} from {len(csv_paths)} problem CSVs."
     )
 
 
